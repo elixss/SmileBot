@@ -35,6 +35,17 @@ for filename in os.listdir('./Cogs'):
 async def on_message_edit(before, after):
     await bot.process_commands(after)
 
+@tasks.loop(count=1)
+async def patch_app_commands():
+    await bot.wait_until_ready()
+    
+    for command in bot.global_application_commands:
+        print(f"Patching command integration type for {command.id}")
+        await bot.http.edit_global_command(
+            bot.application_id,
+            command.id,
+            payload={"integration_types": [0, 1], "contexts": [0, 1, 2]},
+        )
 
 @bot.event
 async def on_message(message):
@@ -57,4 +68,5 @@ async def on_message(message):
 
 bot_token = os.environ['bot_token']
 
+patch_app_commands.start()
 bot.run(bot_token)
